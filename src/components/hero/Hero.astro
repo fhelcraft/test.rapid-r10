@@ -1,0 +1,65 @@
+---
+import HeroScene from './HeroScene';
+import RapidWordmark from '../RapidWordmark.astro';
+import { about } from '../../data/rapid';
+---
+
+<section id="top" class="hero relative isolate flex min-h-[100svh] items-end overflow-hidden bg-canopy text-mist">
+	<HeroScene client:only="react" />
+	<div class="hero-shade pointer-events-none absolute inset-0" aria-hidden="true"></div>
+
+	<div class="shell relative pb-14 pt-36 sm:pb-20">
+		<p class="hero-in mb-6 max-w-md text-[0.95rem] text-mist/75" style="--d: 0.2s">
+			Department of Trade and Industry, Region 10, with the International Fund for Agricultural Development
+		</p>
+		<h1 class="display hero-in text-[clamp(3.1rem,11vw,9.5rem)] text-mist" style="--d: 0.35s">
+			<span class="whitespace-nowrap"><RapidWordmark class="mr-[0.22em] align-baseline" />Growth</span>
+			<span class="block text-[0.5em] font-semibold text-mist/85" style="font-stretch: 100%; letter-spacing: -0.01em;">
+				in Northern Mindanao
+			</span>
+		</h1>
+		<div class="mt-10 grid gap-8 md:grid-cols-[minmax(0,30rem)_auto] md:items-end md:justify-between">
+			<p class="hero-in text-lg text-mist/85" style="--d: 0.55s">
+				{about.name}. Working with smallholder farmers, farmer organizations and MSMEs in the coffee, cacao and coconut
+				country of Bukidnon and Misamis Oriental.
+			</p>
+			<div class="hero-in flex flex-wrap gap-3" style="--d: 0.7s">
+				<a href="#stories" class="btn bg-gold text-canopy-deep hover:bg-mist">See the latest stories</a>
+				<a href="#about" class="btn border border-mist/30 text-mist hover:border-mist hover:bg-mist/10">About the project</a>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.hero {
+		background:
+			radial-gradient(80% 60% at 70% 30%, #0b3d42 0%, transparent 70%),
+			var(--color-canopy);
+	}
+	.hero-shade {
+		background:
+			linear-gradient(to top, var(--color-canopy) 0%, rgb(6 43 47 / 0.75) 30%, transparent 62%),
+			linear-gradient(to right, rgb(6 43 47 / 0.7), transparent 55%);
+	}
+	/* The one orchestrated load sequence on the page */
+	.hero-in {
+		opacity: 0;
+		transform: translateY(18px);
+		animation: hero-in 1.1s var(--ease-out-quint) forwards;
+		animation-delay: var(--d, 0s);
+	}
+	@keyframes hero-in {
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.hero-in {
+			animation: none;
+			opacity: 1;
+			transform: none;
+		}
+	}
+</style>

@@ -1,0 +1,216 @@
+---
+import { places, commodities, link } from '../data/rapid';
+
+// Simple equirectangular projection over Northern Mindanao
+const W = 1000;
+const H = 820;
+const LON = [123.95, 125.65];
+const LAT = [8.75, 7.35];
+const px = (lon: number) => ((lon - LON[0]) / (LON[1] - LON[0])) * W;
+const py = (lat: number) => ((lat - LAT[0]) / (LAT[1] - LAT[0])) * H;
+
+// Decorative contour rings around the Bukidnon massifs (Kitanglad, Kalatungan)
+const peaks = [
+	{ lat: 8.14, lon: 124.92, rings: 11, seed: 0.4 },
+	{ lat: 7.95, lon: 124.78, rings: 7, seed: 2.1 },
+	{ lat: 8.3, lon: 125.35, rings: 5, seed: 4.2 },
+];
+const contours = peaks.flatMap((p) =>
+	Array.from({ length: p.rings }, (_, k) => {
+		const r0 = 16 + k * 26;
+		const pts = Array.from({ length: 72 }, (_, i) => {
+			const t = (i / 72) * Math.PI * 2;
+			const r = r0 * (1 + 0.13 * Math.sin(3 * t + k * 0.6 + p.seed) + 0.07 * Math.sin(5 * t - p.seed));
+			return `${(px(p.lon) + Math.cos(t) * r * 1.15).toFixed(1)},${(py(p.lat) + Math.sin(t) * r).toFixed(1)}`;
+		});
+		return { d: `M${pts.join('L')}Z`, index: (k + 1) % 5 === 0 };
+	}),
+);
+
+const provinces = [
+	{ name: 'Misamis Oriental', lat: 8.62, lon: 124.62 },
+	{ name: 'Bukidnon', lat: 7.78, lon: 125.18 },
+];
+---
+
+<section id="where" class="relative overflow-hidden bg-mist-deep/60 py-24 sm:py-32">
+	<div class="shell grid items-center gap-14 lg:grid-cols-[minmax(0,26rem)_1fr]">
+		<div>
+			<h2 class="display text-[clamp(2.2rem,4.5vw,3.6rem)] text-teal">Where we work in Region 10</h2>
+			<p class="mt-6 text-ink/80">
+				{`In Northern Mindanao the project works across Bukidnon and Misamis Oriental, with farmers growing ${commodities.slice(0, -1).join(', ').toLowerCase()} and ${commodities.at(-1)!.toLowerCase()}.`}
+			</p>
+			<ul class="mt-10 space-y-6">
+				{
+					places.map((p) => (
+						<li>
+							<a href={link(`/webrep_v2/article/${p.article}`)} target="_blank" rel="noopener" class="group block" data-place={p.name}>
+								<span class="block font-semibold text-teal group-hover:underline group-hover:underline-offset-4">
+									{p.name}, {p.province}
+								</span>
+								<span class="block text-ink/70">{p.focus}</span>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+
+		<div class="map-stage" data-map>
+			<div class="map-plane">
+				<svg viewBox={`0 0 ${W} ${H}`} class="absolute inset-0 h-full w-full" aria-hidden="true">
+					<defs>
+						<radialGradient id="map-glow" cx="50%" cy="50%" r="60%">
+							<stop offset="0%" stop-color="#0b4a52" />
+							<stop offset="100%" stop-color="#062b2f" />
+						</radialGradient>
+					</defs>
+					<rect width={W} height={H} rx="18" fill="url(#map-glow)" />
+					{
+						contours.map((c) => (
+							<path
+								d={c.d}
+								fill="none"
+								stroke={c.index ? '#d8a93b' : '#5f9c97'}
+								stroke-width={c.index ? 2 : 1}
+								opacity={c.index ? 0.85 : 0.5}
+							/>
+						))
+					}
+					{
+						provinces.map((p) => (
+							<text x={px(p.lon)} y={py(p.lat)} fill="#e9efea" opacity="0.55" font-size="26" font-family="Archivo" font-weight="600" text-anchor="middle">
+								{p.name}
+							</text>
+						))
+					}
+				</svg>
+				{
+					places.map((p) => (
+						<a
+							href={link(`/webrep_v2/article/${p.article}`)}
+							target="_blank"
+							rel="noopener"
+							class="pin"
+							style={`left:${(px(p.lon) / W) * 100}%;top:${(py(p.lat) / H) * 100}%`}
+							aria-label={`${p.name}, ${p.province}: ${p.focus} (opens dtirapid.ph)`}
+							data-pin={p.name}
+						>
+							<span class="pin-up">
+								<span class="pin-label">{p.name}</span>
+								<span class="pin-stem" />
+							</span>
+							<span class="pin-base" />
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.map-stage {
+		perspective: 1600px;
+		--tilt-x: 52deg;
+		--tilt-z: -12deg;
+		padding-block: 1rem;
+	}
+	.map-plane {
+		position: relative;
+		aspect-ratio: 1000 / 820;
+		transform-style: preserve-3d;
+		transform: scale(0.86) rotateX(var(--tilt-x)) rotateZ(var(--tilt-z));
+		transition: transform 1s var(--ease-out-quint);
+		box-shadow: 0 60px 80px -40px rgb(3 26 29 / 0.6);
+		border-radius: 18px;
+	}
+	.pin {
+		position: absolute;
+		transform-style: preserve-3d;
+		width: 0;
+		height: 0;
+	}
+	.pin-base {
+		position: absolute;
+		width: 18px;
+		height: 18px;
+		margin: -9px 0 0 -9px;
+		border-radius: 50%;
+		background: var(--color-gold);
+		box-shadow: 0 0 0 6px rgb(216 169 59 / 0.25);
+	}
+	/* stands the label up off the tilted plane, facing the viewer */
+	.pin-up {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		transform-origin: 50% 100%;
+		transform: translateX(-50%) rotateZ(calc(var(--tilt-z) * -1)) rotateX(calc(var(--tilt-x) * -1));
+		transition: transform 1s var(--ease-out-quint);
+	}
+	.pin-label {
+		white-space: nowrap;
+		padding: 0.45rem 0.85rem;
+		border-radius: 999px;
+		background: var(--color-mist);
+		color: var(--color-teal);
+		font-weight: 700;
+		font-size: 0.95rem;
+		box-shadow: 0 10px 24px -10px rgb(3 26 29 / 0.7);
+		transition:
+			background-color 0.25s,
+			color 0.25s;
+	}
+	.pin-stem {
+		width: 2px;
+		height: 54px;
+		background: linear-gradient(var(--color-mist), var(--color-gold));
+	}
+	.pin:hover .pin-label,
+	.pin:focus-visible .pin-label,
+	.pin[data-on] .pin-label {
+		background: var(--color-gold);
+		color: var(--color-canopy-deep);
+	}
+	@media (max-width: 640px) {
+		.pin-label {
+			font-size: 0.8rem;
+			padding: 0.35rem 0.65rem;
+		}
+		.pin-stem {
+			height: 34px;
+		}
+	}
+</style>
+
+<script>
+	// Ease the map toward the pointer, and light up the pin for a hovered list item
+	const stage = document.querySelector<HTMLElement>('[data-map]');
+	const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	if (stage && !still) {
+		stage.addEventListener('pointermove', (e) => {
+			const r = stage.getBoundingClientRect();
+			const x = (e.clientX - r.left) / r.width - 0.5;
+			const y = (e.clientY - r.top) / r.height - 0.5;
+			stage.style.setProperty('--tilt-x', `${52 - y * 10}deg`);
+			stage.style.setProperty('--tilt-z', `${-12 + x * 10}deg`);
+		});
+		stage.addEventListener('pointerleave', () => {
+			stage.style.setProperty('--tilt-x', '52deg');
+			stage.style.setProperty('--tilt-z', '-12deg');
+		});
+	}
+	document.querySelectorAll<HTMLElement>('[data-place]').forEach((item) => {
+		const pin = document.querySelector<HTMLElement>(`[data-pin="${item.dataset.place}"]`);
+		const on = () => pin?.setAttribute('data-on', '');
+		const off = () => pin?.removeAttribute('data-on');
+		item.addEventListener('pointerenter', on);
+		item.addEventListener('pointerleave', off);
+		item.addEventListener('focus', on);
+		item.addEventListener('blur', off);
+	});
+</script>

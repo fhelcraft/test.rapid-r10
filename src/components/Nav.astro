@@ -1,0 +1,78 @@
+---
+import { Image } from 'astro:assets';
+import rapidLogo from '../assets/logos/rapid.svg';
+import { about } from '../data/rapid';
+
+const links = [
+	{ label: 'About', href: '#about' },
+	{ label: 'Impact', href: '#impact' },
+	{ label: 'Where we work', href: '#where' },
+	{ label: 'Stories', href: '#stories' },
+];
+---
+
+<header class="nav-wrap" data-nav>
+	<nav class="nav shell" aria-label="Main">
+		<a href="#top" class="flex items-center gap-3 rounded-full" aria-label="RAPID Growth Project, Region 10, back to top">
+			<Image src={rapidLogo} alt="" class="h-9 w-auto" loading="eager" />
+			<span class="hidden text-sm leading-tight text-teal sm:block">
+				<span class="block font-semibold">Region 10</span>
+				<span class="block text-teal/70">Northern Mindanao</span>
+			</span>
+		</a>
+		<ul class="hidden items-center gap-7 text-[0.95rem] font-medium text-ink/80 md:flex">
+			{links.map((l) => <li><a href={l.href} class="transition-colors hover:text-teal">{l.label}</a></li>)}
+		</ul>
+		<a href={about.learnMore} target="_blank" rel="noopener" class="btn bg-teal py-2.5 text-sm text-mist hover:bg-canopy">
+			Visit dtirapid.ph
+		</a>
+	</nav>
+</header>
+
+<style>
+	.nav-wrap {
+		position: fixed;
+		inset: 0.75rem 0 auto;
+		z-index: 50;
+		pointer-events: none;
+	}
+	.nav {
+		pointer-events: auto;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		max-width: 76rem;
+		padding-block: 0.5rem;
+		padding-inline: 0.75rem 0.5rem;
+		border-radius: 999px;
+		background: color-mix(in oklab, var(--color-mist) 82%, transparent);
+		backdrop-filter: blur(14px) saturate(1.3);
+		-webkit-backdrop-filter: blur(14px) saturate(1.3);
+		box-shadow:
+			0 0 0 1px color-mix(in oklab, var(--color-teal) 10%, transparent),
+			0 10px 30px -12px rgb(3 26 29 / 0.45);
+		width: calc(100% - 2rem);
+		transition: transform 0.5s var(--ease-out-quint);
+	}
+	.nav-wrap[data-hidden] .nav {
+		transform: translateY(-140%);
+	}
+</style>
+
+<script>
+	// Hide the bar on scroll down, bring it back on scroll up
+	const nav = document.querySelector<HTMLElement>('[data-nav]');
+	let last = window.scrollY;
+	window.addEventListener(
+		'scroll',
+		() => {
+			const y = window.scrollY;
+			if (!nav) return;
+			nav.toggleAttribute('data-hidden', y > last && y > 400);
+			last = y;
+		},
+		{ passive: true },
+	);
+	nav?.addEventListener('focusin', () => nav.removeAttribute('data-hidden'));
+</script>

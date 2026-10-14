@@ -1,0 +1,125 @@
+---
+import { stats } from '../data/rapid';
+
+const fmt = (n: number) => n.toLocaleString('en-US');
+const share = (n: number) => Math.round((n / stats.farmers) * 1000) / 10;
+
+const inclusion = [
+	{ label: 'Women farmers', value: stats.women },
+	{ label: 'Youth farmers', value: stats.youth },
+	{ label: 'Indigenous Peoples farmers', value: stats.ip },
+];
+---
+
+<section id="impact" class="relative overflow-hidden bg-teal py-24 text-mist sm:py-32" data-impact>
+	<div class="shell">
+		<p class="max-w-[60rem] text-[clamp(1.6rem,3.6vw,2.9rem)] leading-[1.18] text-mist/80">
+			As of {stats.asOf}, the project reaches{' '}
+			<span class="num" data-count={stats.farmers}>{fmt(stats.farmers)}</span> smallholder farmers,{' '}
+			<span class="num" data-count={stats.farmerOrgs}>{fmt(stats.farmerOrgs)}</span> farmer organizations and{' '}
+			<span class="num" data-count={stats.msmes}>{fmt(stats.msmes)}</span> MSMEs in{' '}
+			<span class="num">{stats.provinces}</span> provinces across <span class="num">{stats.regions}</span> regions.
+		</p>
+
+		<div class="mt-20 grid gap-14 border-t border-mist/15 pt-12 md:grid-cols-[1fr_1fr_1.35fr] md:gap-10">
+			<div>
+				<p class="display text-[clamp(2rem,3.4vw,2.9rem)] text-mist">
+					₱<span data-count={stats.investments}>{fmt(stats.investments)}</span>
+				</p>
+				<p class="mt-3 text-mist/70">in investments delivered to beneficiaries</p>
+			</div>
+			<div>
+				<p class="display text-[clamp(2rem,3.4vw,2.9rem)] text-mist">
+					<span data-count={stats.roads}>{stats.roads}</span> roads
+				</p>
+				<p class="mt-3 text-mist/70">farm-to-market, covering {stats.roadKm} km</p>
+			</div>
+			<div>
+				<p class="text-mist/70">Who the farmers are, as a share of all {fmt(stats.farmers)}</p>
+				<dl class="mt-5 space-y-5">
+					{
+						inclusion.map((g) => (
+							<div>
+								<div class="flex items-baseline justify-between gap-4">
+									<dt>{g.label}</dt>
+									<dd class="font-semibold tabular-nums">
+										{fmt(g.value)} <span class="font-normal text-mist/60">({share(g.value)}%)</span>
+									</dd>
+								</div>
+								<div class="bar mt-2" aria-hidden="true">
+									<span style={`--w: ${share(g.value)}%`} />
+								</div>
+							</div>
+						))
+					}
+				</dl>
+			</div>
+		</div>
+
+		<p class="mt-16 text-sm text-mist/60">
+			Project-wide figures for all {stats.regions} regions, published on{' '}
+			<a href={stats.dashboard} target="_blank" rel="noopener" class="underline underline-offset-4 hover:text-mist">the RAPID Growth dashboard</a>.
+		</p>
+	</div>
+</section>
+
+<style>
+	.num {
+		font-family: var(--font-display);
+		font-stretch: 112%;
+		font-weight: 800;
+		color: var(--color-mist);
+		font-variant-numeric: tabular-nums;
+	}
+	.bar {
+		height: 6px;
+		border-radius: 3px;
+		background: rgb(233 239 234 / 0.12);
+		overflow: hidden;
+	}
+	.bar span {
+		display: block;
+		height: 100%;
+		width: var(--w);
+		background: var(--color-leaf);
+		border-radius: inherit;
+		transform-origin: left;
+	}
+	[data-impact][data-armed] .bar span {
+		transform: scaleX(0);
+	}
+	[data-impact][data-armed][data-seen] .bar span {
+		transform: scaleX(1);
+		transition: transform 1.6s var(--ease-out-quint) 0.3s;
+	}
+</style>
+
+<script>
+	// Count the figures up once, the first time the section comes into view
+	const section = document.querySelector<HTMLElement>('[data-impact]');
+	const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	if (section && !still) {
+		const els = [...section.querySelectorAll<HTMLElement>('[data-count]')];
+		const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
+		section.setAttribute('data-armed', '');
+		els.forEach((el) => (el.textContent = '0'));
+		const io = new IntersectionObserver(
+			([entry]) => {
+				if (!entry.isIntersecting) return;
+				io.disconnect();
+				section.setAttribute('data-seen', '');
+				const t0 = performance.now();
+				const dur = 1800;
+				const tick = (t: number) => {
+					const p = Math.min(1, (t - t0) / dur);
+					const e = 1 - Math.pow(1 - p, 4);
+					els.forEach((el) => (el.textContent = fmt(Number(el.dataset.count) * e)));
+					if (p < 1) requestAnimationFrame(tick);
+				};
+				requestAnimationFrame(tick);
+			},
+			{ threshold: 0.35 },
+		);
+		io.observe(section);
+	}
+</script>

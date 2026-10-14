@@ -1,0 +1,229 @@
+---
+import { getImage } from 'astro:assets';
+import MuseumCarousel, { type GalleryItem } from './MuseumCarousel';
+import { news, link } from '../../data/rapid';
+
+const items: GalleryItem[] = await Promise.all(
+	news.map(async ({ image, ...n }) => {
+		const img = await getImage({ src: image, width: 840, format: 'webp' });
+		return { ...n, src: img.src };
+	}),
+);
+---
+
+<section id="stories" class="gallery relative overflow-hidden bg-canopy-deep py-24 text-mist sm:py-28">
+	<div class="shell flex flex-wrap items-end justify-between gap-6">
+		<div class="max-w-xl">
+			<h2 class="display text-[clamp(2.2rem,4.5vw,3.6rem)]">Stories from the field</h2>
+			<p class="mt-5 text-mist/70">
+				Recent news and stories from the project. Drag the wall, or use the arrow keys. Each frame opens the full article on dtirapid.ph.
+			</p>
+		</div>
+		<a href={link('/webrep_v2/news_and_updates')} target="_blank" rel="noopener" class="btn border border-mist/25 text-mist hover:border-mist hover:bg-mist/10">
+			All news and updates
+		</a>
+	</div>
+
+	<div class="mt-10">
+		<MuseumCarousel client:visible items={items} />
+	</div>
+</section>
+
+<style is:global>
+	.gallery {
+		background:
+			radial-gradient(70% 55% at 50% 38%, #0d3c41 0%, transparent 70%),
+			linear-gradient(#031a1d, #062b2f 70%, #031a1d);
+	}
+	.museum {
+		position: relative;
+	}
+	.museum-room {
+		position: relative;
+		height: clamp(520px, calc(var(--card-w, 360px) * 1.75), 760px);
+		perspective: 1300px;
+		perspective-origin: 50% 40%;
+		overflow: hidden;
+		touch-action: pan-y;
+		cursor: grab;
+		user-select: none;
+	}
+	.museum-room:active {
+		cursor: grabbing;
+	}
+	.museum-wall {
+		position: absolute;
+		inset: 0;
+		transform-style: preserve-3d;
+	}
+	.museum-frame {
+		position: absolute;
+		top: 13%;
+		left: 50%;
+		width: var(--card-w, 360px);
+		margin-left: calc(var(--card-w, 360px) / -2);
+		backface-visibility: hidden;
+		will-change: transform, opacity;
+		--lit: 0;
+	}
+	.museum-frame a {
+		display: block;
+		position: relative;
+	}
+	/* gallery spotlight on the wall above each frame */
+	.museum-frame .spot {
+		position: absolute;
+		left: -30%;
+		right: -30%;
+		top: -14%;
+		height: 110%;
+		background: radial-gradient(50% 55% at 50% 20%, rgb(255 226 160 / 0.22), transparent 70%);
+		opacity: calc(0.25 + var(--lit) * 0.75);
+		pointer-events: none;
+	}
+	.museum-frame .frame {
+		position: relative;
+		display: block;
+		padding: 10px;
+		background: linear-gradient(145deg, #3a2a1f, #1f150f);
+		border-radius: 3px;
+		box-shadow:
+			inset 0 0 0 1px rgb(255 255 255 / 0.08),
+			0 40px 60px -30px rgb(0 0 0 / 0.9);
+		filter: brightness(calc(0.45 + var(--lit) * 0.55));
+	}
+	.museum-frame .mat {
+		display: block;
+		padding: clamp(10px, 4%, 22px);
+		background: #eef2ee;
+		box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.25);
+	}
+	.museum-frame img {
+		display: block;
+		width: 100%;
+		aspect-ratio: 4 / 3;
+		object-fit: cover;
+	}
+	.placard {
+		display: block;
+		width: 82%;
+		margin: 22px auto 0;
+		padding: 0.85rem 1rem 1rem;
+		background: var(--color-mist);
+		color: var(--color-ink);
+		border-radius: 2px;
+		box-shadow: 0 14px 24px -14px rgb(0 0 0 / 0.8);
+		opacity: calc(0.35 + var(--lit) * 0.65);
+	}
+	.placard-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		font-size: 0.8rem;
+		color: rgb(14 35 38 / 0.7);
+	}
+	.tag {
+		padding: 0.1rem 0.5rem;
+		border-radius: 999px;
+		font-weight: 700;
+		color: var(--color-mist);
+		background: var(--color-teal);
+	}
+	.tag-story {
+		background: var(--color-leaf);
+	}
+	.placard-title {
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		margin-top: 0.5rem;
+		font-weight: 700;
+		font-size: 0.98rem;
+		line-height: 1.3;
+		color: var(--color-teal);
+	}
+	.museum-frame a:hover .placard-title,
+	.museum-frame a:focus-visible .placard-title {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	.placard-place {
+		display: block;
+		margin-top: 0.4rem;
+		font-size: 0.82rem;
+		color: rgb(14 35 38 / 0.65);
+	}
+	.museum-floor {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 16%;
+		background: linear-gradient(to bottom, transparent, rgb(0 0 0 / 0.3) 55%, transparent);
+		pointer-events: none;
+	}
+	.museum-controls {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1.25rem;
+		margin-top: 0.5rem;
+	}
+	.museum-controls > button {
+		display: grid;
+		place-items: center;
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		border: 1px solid rgb(233 239 234 / 0.3);
+		color: var(--color-mist);
+		transition:
+			background-color 0.25s,
+			border-color 0.25s;
+	}
+	.museum-controls > button:hover {
+		background: rgb(233 239 234 / 0.1);
+		border-color: var(--color-mist);
+	}
+	.museum-index {
+		display: flex;
+		gap: 0.25rem;
+	}
+	.museum-index button {
+		display: block;
+		width: 28px;
+		height: 24px;
+		position: relative;
+	}
+	.museum-index button::after {
+		content: '';
+		position: absolute;
+		left: 4px;
+		right: 4px;
+		top: 50%;
+		height: 2px;
+		background: rgb(233 239 234 / 0.3);
+		transition: background-color 0.3s;
+	}
+	.museum-index button[aria-current]::after {
+		background: var(--color-gold);
+	}
+	.museum-live {
+		max-width: 36rem;
+		min-height: 3.2em;
+		margin: 1.25rem auto 0;
+		padding-inline: 1rem;
+		text-align: center;
+		color: rgb(233 239 234 / 0.7);
+	}
+	@media (max-width: 640px) {
+		.museum-room {
+			perspective: 900px;
+			height: 540px;
+		}
+		.placard {
+			width: 92%;
+		}
+	}
+</style>

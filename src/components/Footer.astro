@@ -1,0 +1,44 @@
+---
+import { Image } from 'astro:assets';
+import rapidLogo from '../assets/logos/rapid.svg';
+import dtiLogo from '../assets/logos/dti.png';
+import ifadLogo from '../assets/logos/ifad.png';
+import { contact, SOURCE } from '../data/rapid';
+---
+
+<footer class="bg-mist">
+	<div class="shell grid gap-14 py-20 lg:grid-cols-[1.2fr_1fr_1fr]">
+		<div>
+			<Image src={rapidLogo} alt="RAPID Growth Project" class="h-14 w-auto" />
+			<p class="mt-6 max-w-sm text-ink/75">
+				A project of the Department of Trade and Industry, funded by the International Fund for Agricultural Development.
+			</p>
+			<div class="mt-8 flex items-center gap-8">
+				<a href={contact.dti} target="_blank" rel="noopener" aria-label="Department of Trade and Industry">
+					<Image src={dtiLogo} alt="Department of Trade and Industry" class="h-14 w-auto" />
+				</a>
+				<a href={contact.ifad} target="_blank" rel="noopener" aria-label="International Fund for Agricultural Development">
+					<Image src={ifadLogo} alt="International Fund for Agricultural Development" class="h-11 w-auto" />
+				</a>
+			</div>
+		</div>
+
+		<nav aria-label="More on dtirapid.ph">
+			<h2 class="font-semibold text-teal">More on dtirapid.ph</h2>
+			<ul class="mt-5 space-y-3 text-ink/80">
+				{contact.links.map((l) => <li><a href={l.href} target="_blank" rel="noopener" class="hover:text-teal hover:underline hover:underline-offset-4">{l.label}</a></li>)}
+			</ul>
+		</nav>
+
+		<div>
+			<h2 class="font-semibold text-teal">Project office</h2>
+			<address class="mt-5 max-w-xs not-italic text-ink/80">{contact.address}</address>
+		</div>
+	</div>
+	<div class="border-t border-teal/15">
+		<p class="shell py-6 text-sm text-ink/60">
+			All content is in the public domain unless otherwise stated. Source:
+			<a href={SOURCE} target="_blank" rel="noopener" class="underline underline-offset-4 hover:text-teal">dtirapid.ph</a>.
+		</p>
+	</div>
+</footer>
