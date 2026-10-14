@@ -40,9 +40,7 @@ import { contact, SOURCE } from '../data/rapid';
 		<div class="shell flex flex-col gap-6 py-8 sm:flex-row sm:items-center sm:gap-8">
 			<div class="flex items-center gap-4">
 				<Image src={republika} alt="Seal of the Republic of the Philippines" class="h-16 w-auto" />
-				<p class="font-semibold leading-tight">
-					Republic of the<br />Philippines
-				</p>
+				<p class="republika text-2xl leading-tight">Republic of the Philippines</p>
 			</div>
 			<p class="text-sm text-mist/75 sm:ml-auto sm:max-w-md sm:text-right">
 				All content is in the public domain unless otherwise stated. Source:{' '}
@@ -51,3 +49,11 @@ import { contact, SOURCE } from '../data/rapid';
 		</div>
 	</div>
 </footer>
+
+<style>
+	/* Government letterhead style: Old English Text MT where installed, free blackletter fallback elsewhere */
+	.republika {
+		font-family: 'Old English Text MT', 'UnifrakturMaguntia', serif;
+		font-weight: 400;
+	}
+</style>
