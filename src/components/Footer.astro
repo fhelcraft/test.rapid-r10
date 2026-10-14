@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import rapidLogo from '../assets/logos/rapid.svg';
 import dtiLogo from '../assets/logos/dti.png';
 import ifadLogo from '../assets/logos/ifad.png';
+import republika from '../assets/logos/republika.png';
 import { contact, SOURCE } from '../data/rapid';
 ---
 
@@ -35,10 +36,18 @@ import { contact, SOURCE } from '../data/rapid';
 			<address class="mt-5 max-w-xs not-italic text-ink/80">{contact.address}</address>
 		</div>
 	</div>
-	<div class="border-t border-teal/15">
-		<p class="shell py-6 text-sm text-ink/60">
-			All content is in the public domain unless otherwise stated. Source:
-			<a href={SOURCE} target="_blank" rel="noopener" class="underline underline-offset-4 hover:text-teal">dtirapid.ph</a>.
-		</p>
+	<div class="bg-teal text-mist">
+		<div class="shell flex flex-col gap-6 py-8 sm:flex-row sm:items-center sm:gap-8">
+			<div class="flex items-center gap-4">
+				<Image src={republika} alt="Seal of the Republic of the Philippines" class="h-16 w-auto" />
+				<p class="font-semibold leading-tight">
+					Republic of the<br />Philippines
+				</p>
+			</div>
+			<p class="text-sm text-mist/75 sm:ml-auto sm:max-w-md sm:text-right">
+				All content is in the public domain unless otherwise stated. Source:{' '}
+				<a href={SOURCE} target="_blank" rel="noopener" class="underline underline-offset-4 hover:text-mist">dtirapid.ph</a>.
+			</p>
+		</div>
 	</div>
 </footer>
